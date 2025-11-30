@@ -8,8 +8,6 @@ class FilesView extends GetView<FilesController> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Files'),
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -25,9 +23,9 @@ class FilesView extends GetView<FilesController> {
               children: [
                 Icon(Icons.folder_open, size: 64, color: Colors.grey),
                 SizedBox(height: 16),
-                Text('No files yet', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                Text('No files yet', style: TextStyle(fontSize: 18)),
                 SizedBox(height: 8),
-                Text('Tap + to add files', style: TextStyle(color: Colors.grey)),
+                Text('Tap + to add files'),
               ],
             ),
           );
@@ -114,8 +112,7 @@ class FilesView extends GetView<FilesController> {
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: controller.pickFile,
-        backgroundColor: Colors.blue.shade600,
-        child: Icon(Icons.add, color: Colors.white),
+        child: Icon(Icons.add),
       ),
     );
   }

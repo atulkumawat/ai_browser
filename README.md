@@ -1,18 +1,20 @@
-# AI Browser - AI-Powered In-App Browser & Document Summarizer
+# AI Browser - Advanced AI-Powered Browser & Smart Search Engine
 
-A comprehensive Flutter application that combines web browsing capabilities with AI-powered content summarization and multi-language translation features.
+A comprehensive Flutter application that combines intelligent web browsing with AI-powered content analysis, smart search capabilities, and advanced file management features.
 
 ## Project Overview
 
-AI Browser is a cross-platform mobile application built with Flutter that provides:
+AI Browser is a cross-platform application built with Flutter that provides:
 
-- **In-App Web Browsing** with full navigation controls
-- **AI-Powered Content Summarization** using OpenAI GPT-3.5
-- **Multi-Language Translation** (Hindi, Spanish, French)
-- **File Management System** with document processing
-- **Browsing History & Tab Management**
-- **Offline Content Access** with local caching
-- **Cross-Platform Support** (Android, iOS, Web)
+- **Intelligent Web Browsing** with full navigation controls and WebView integration
+- **Smart Search Engine** - Detects URLs vs text queries automatically
+- **AI-Powered Content Summarization** using OpenAI GPT-3.5 with comprehensive analysis
+- **Multi-Language Translation** (Hindi, Spanish, French) with caching
+- **Advanced File Management** with PDF creation, download tracking, and content viewing
+- **Interactive Downloads Panel** with file opening and content display
+- **Dark/Light Theme Support** with complete UI adaptation
+- **Browsing History & Multi-Tab Management** with persistent storage
+- **Cross-Platform Support** (Android, iOS, Web) with platform-specific optimizations
 
 ## Architecture
 
@@ -243,75 +245,174 @@ Future<Map<String, dynamic>> summarizeText(String text) async {
 
 ### Core Modules
 
-1. **Browser Module**
-   - Multi-tab browsing with WebView
-   - Navigation controls (back, forward, refresh)
-   - URL validation and handling
-   - Download support for documents
+1. **Smart Browser Module**
+   - Multi-tab browsing with advanced WebView integration
+   - Intelligent URL detection vs text search queries
+   - Navigation controls (back, forward, refresh) with history management
+   - Real-time loading states and error handling
+   - External browser fallback for blocked sites
 
-2. **AI Summary Module**
-   - Real-time content extraction
-   - OpenAI GPT-3.5 integration
-   - Intelligent fallback summaries
-   - Copy, share, and export options
+2. **AI-Powered Search Engine**
+   - Automatic detection of URLs vs search queries
+   - AI-generated responses for text searches
+   - Web browsing for URL inputs
+   - Platform-specific API handling (mobile vs web)
+   - Comprehensive search result formatting
 
-3. **Translation Module**
-   - Multi-language support (Hindi, Spanish, French)
+3. **Advanced AI Summary Module**
+   - Real-time content extraction from web pages
+   - OpenAI GPT-3.5 integration with detailed analysis
+   - Intelligent fallback summaries with comprehensive content
+   - Copy, share, and PDF export options
+   - Right-side panel display with smooth animations
+
+4. **Multi-Language Translation System**
+   - Support for Hindi, Spanish, French translations
    - Cached translations for offline access
-   - Real-time language switching
+   - Real-time language switching in summary panel
+   - Translation progress indicators
+   - Fallback translation support
 
-4. **File Management**
-   - Document upload and processing
-   - PDF, DOCX, PPTX, XLSX support
-   - File summarization and translation
-   - Local storage management
+5. **Enhanced File Management**
+   - PDF creation with formatted content and metadata
+   - File download tracking with timestamps
+   - Interactive file opening and content viewing
+   - File content display in browser panel
+   - Automatic cleanup of broken file references
+   - Copy file content functionality
 
-5. **History & Tabs**
-   - Browsing history tracking
-   - Active tab management
-   - Visit count and timestamps
-   - Search and filter capabilities
+6. **Advanced Downloads System**
+   - Modern dropdown design with file icons
+   - Chronological sorting (latest first)
+   - File size and date formatting
+   - One-tap file opening
+   - Content preview and copying
+   - Automatic file cleanup
 
-6. **Settings & Preferences**
-   - Dark/Light theme toggle
-   - AI feature controls
-   - Privacy settings
-   - Cache management
+7. **Comprehensive Theme System**
+   - Complete dark/light mode support
+   - Dynamic color adaptation for all UI elements
+   - Theme-aware text colors and backgrounds
+   - Smooth theme transitions
+   - Persistent theme preferences
+
+8. **Multi-Tab Management**
+   - Visual tab indicators with active states
+   - Tab switching with smooth animations
+   - Tab closing with confirmation
+   - Persistent tab state across sessions
+   - Tab title and URL management
 
 ## Technical Specifications
 
 - **Framework**: Flutter 3.9.2+
 - **Language**: Dart
-- **State Management**: GetX 4.6.6
-- **Storage**: Hive 2.2.3 + SQLite 2.3.3
-- **HTTP Client**: Dio 5.3.2
-- **AI Integration**: OpenAI API
-- **WebView**: flutter_inappwebview 6.1.5
-- **File Operations**: file_picker 8.1.2
+- **State Management**: GetX 4.6.6 (Reactive programming with .obs)
+- **Storage**: Hive 2.2.3 (Primary NoSQL) + SQLite 2.3.3 (Relational backup)
+- **HTTP Client**: Dio 5.3.2 with error handling and retries
+- **AI Integration**: OpenAI GPT-3.5 API with fallback responses
+- **WebView**: flutter_inappwebview 6.1.5 with advanced settings
+- **File Operations**: file_picker 8.1.2 + open_file 3.3.2
+- **PDF Generation**: syncfusion_flutter_pdf 20.4.54
+- **Platform Detection**: flutter/foundation.dart for web/mobile optimization
 
 ## Performance Features
 
-- **FPS Monitoring**: Real-time performance tracking
-- **Lazy Loading**: Efficient memory management
-- **Caching Strategy**: Intelligent content caching
-- **Offline Support**: Local data persistence
-- **Error Handling**: Comprehensive error management
+- **FPS Monitoring**: Real-time performance tracking with visual indicators
+- **Lazy Loading**: Efficient memory management for large content
+- **Smart Caching Strategy**: 
+  - File content caching for instant access
+  - Translation caching for offline use
+  - Tab state persistence
+  - Global file content storage
+- **Platform Optimization**:
+  - Web-specific CORS handling
+  - Mobile-optimized API calls
+  - Conditional feature loading
+- **Advanced Error Handling**:
+  - Graceful API failure recovery
+  - Automatic file cleanup
+  - Network error management
+  - User-friendly error messages
+- **Memory Management**:
+  - Efficient WebView handling
+  - Automatic resource cleanup
+  - Optimized state management
+
+## Latest Features (v2.0)
+
+### 🆕 Smart Search Engine
+- **Intelligent Query Detection**: Automatically distinguishes between URLs and search queries
+- **AI-Powered Responses**: Generates comprehensive answers for text searches
+- **Seamless Web Browsing**: Direct navigation for URL inputs
+- **Platform-Aware Processing**: Optimized for both web and mobile platforms
+
+### 🎨 Enhanced UI/UX
+- **Complete Dark Mode**: Full theme support with proper contrast and visibility
+- **Modern Downloads Panel**: Clean design with file icons and metadata
+- **Smooth Animations**: Fluid transitions and loading states
+- **Responsive Design**: Optimized for different screen sizes
+
+### 📁 Advanced File System
+- **Interactive File Opening**: Tap to view file content in browser panel
+- **Content Display**: Full file content viewing with copy functionality
+- **Smart File Management**: Automatic cleanup of broken references
+- **PDF Creation**: Generate formatted PDFs with metadata
+
+### 🔧 Technical Improvements
+- **Error Recovery**: Graceful handling of API failures and network issues
+- **Performance Optimization**: Efficient memory usage and faster loading
+- **Cross-Platform Compatibility**: Seamless experience across all platforms
+- **State Persistence**: Reliable data storage and retrieval
 
 ## Developer
 
-**Atul Kumawat** - Flutter Developer
+**Atul Kumawat** - Senior Flutter Developer
 
-This project showcases advanced Flutter development skills including:
-- Cross-platform mobile app development
-- AI integration with OpenAI GPT-3.5
-- Clean Architecture implementation
-- State management with GetX
-- Real-time performance optimization
+This project demonstrates advanced Flutter development expertise including:
+- **Cross-Platform Development**: Unified codebase for Android, iOS, and Web
+- **AI Integration**: Advanced OpenAI GPT-3.5 implementation with error handling
+- **Clean Architecture**: Modular, maintainable, and scalable code structure
+- **Advanced State Management**: Reactive programming with GetX
+- **Performance Engineering**: Real-time optimization and monitoring
+- **UI/UX Excellence**: Modern design with smooth animations and transitions
+- **Platform-Specific Optimization**: Tailored solutions for different platforms
+
+## Usage Instructions
+
+### Smart Search
+1. **For Web Browsing**: Enter URLs like `google.com`, `facebook.com`, `wikipedia.org`
+2. **For AI Search**: Enter questions like `"what is artificial intelligence?"`, `"how to code?"`
+3. **Auto-Detection**: The app automatically determines your intent
+
+### File Management
+1. **Download Files**: Use the PDF export feature from AI summaries
+2. **View Files**: Tap on files in the downloads dropdown to view content
+3. **Copy Content**: Use the copy button when viewing file content
+4. **File Cleanup**: Broken files are automatically removed
+
+### AI Features
+1. **Generate Summaries**: Click "AI Summary" button on any webpage
+2. **Translate Content**: Use the language dropdown in the summary panel
+3. **Export Content**: Download summaries as formatted PDF files
+4. **Copy & Share**: Use built-in sharing options
+
+### Theme & Customization
+1. **Toggle Theme**: Use the palette icon in the app bar
+2. **Persistent Settings**: Your preferences are automatically saved
+3. **Adaptive UI**: All elements adapt to your chosen theme
 
 ## License
 
-This project is developed as part of a Flutter development assignment demonstrating advanced mobile app development skills with AI integration.
+This project is developed as a comprehensive Flutter development showcase demonstrating:
+- Advanced mobile app development with AI integration
+- Cross-platform compatibility and optimization
+- Modern UI/UX design principles
+- Performance engineering and optimization
+- Clean architecture and best practices
 
 ---
 
-**Created by Atul Kumawat | Flutter Developer | Powered by OpenAI Technology**
+**Created by Atul Kumawat | Senior Flutter Developer | Powered by OpenAI GPT-3.5 Technology**
+
+*Showcasing the future of intelligent mobile browsing with AI-powered content analysis and smart search capabilities.*

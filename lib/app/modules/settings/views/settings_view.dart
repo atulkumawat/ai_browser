@@ -7,8 +7,6 @@ class SettingsView extends GetView<SettingsController> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'),
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -85,7 +83,7 @@ class SettingsView extends GetView<SettingsController> {
                     title: Text('About AI Browser'),
                     subtitle: Text('Version 1.0.0'),
                     trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                    leading: Icon(Icons.psychology, color: Colors.blue),
+                    leading: Icon(Icons.psychology, color: Theme.of(context).colorScheme.primary),
                     onTap: controller.showAbout,
                   ),
                   ListTile(
@@ -110,7 +108,7 @@ class SettingsView extends GetView<SettingsController> {
                   Text(
                     'AI Browser v1.0.0',
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       fontSize: 12,
                     ),
                   ),
@@ -118,7 +116,7 @@ class SettingsView extends GetView<SettingsController> {
                   Text(
                     'Powered by OpenAI GPT-3.5',
                     style: TextStyle(
-                      color: Colors.grey.shade500,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                       fontSize: 10,
                     ),
                   ),
@@ -135,14 +133,13 @@ class SettingsView extends GetView<SettingsController> {
       padding: EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: Colors.blue.shade600, size: 20),
+          Icon(icon, color: Theme.of(Get.context!).colorScheme.primary, size: 20),
           SizedBox(width: 8),
           Text(
             title,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
             ),
           ),
         ],

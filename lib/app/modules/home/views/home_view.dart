@@ -19,11 +19,8 @@ class HomeView extends GetView<HomeController> {
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
           currentIndex: controller.currentIndex.value,
           onTap: controller.changeTab,
-          selectedItemColor: Colors.blue.shade600,
-          unselectedItemColor: Colors.grey.shade500,
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
