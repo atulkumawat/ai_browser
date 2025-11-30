@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 class AIService extends GetxService {
   final Dio _dio = Dio();
   final String _apiKey = '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';
@@ -306,4 +307,66 @@ This web page contains valuable online information with well-structured content.
       return '$language translation: $text (Fallback)';
     }
   }
+
+  Future<String> generateSearchResponse(String query) async {
+    // For web platform, use a proxy or return informative message
+    if (kIsWeb) {
+      return '''🔍 **AI Search Response for: "$query"**
+
+**Note:** Due to web platform limitations, direct API calls are restricted.
+
+**For "$query", here's what I can help with:**
+
+• This appears to be a search query about: $query
+• For real-time information, please visit relevant websites
+• Use specific URLs (like google.com, wikipedia.org) for web browsing
+• This AI browser works best with direct website URLs
+
+**Suggestions:**
+• Try searching "$query" on Google.com
+• Visit Wikipedia.org for encyclopedic information
+• Use specialized websites for specific topics
+• Enter complete URLs for web browsing
+
+**How to use this browser:**
+• Enter URLs (google.com, facebook.com) for web browsing
+• Enter search terms for AI-generated information
+• Use the AI Summary feature for webpage analysis
+
+*For live, real-time information about "$query", please use dedicated search engines or websites.*''';
+    }
+    
+    try {
+      final response = await _dio.post(
+        '$_baseUrl/chat/completions',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $_apiKey',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {
+          'model': 'gpt-3.5-turbo',
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You are a helpful AI assistant. Provide comprehensive, detailed, and informative responses to user queries. Include relevant information, examples, and explanations.'
+            },
+            {
+              'role': 'user',
+              'content': query
+            }
+          ],
+          'max_tokens': 1000,
+          'temperature': 0.7,
+        },
+      );
+      return response.data['choices'][0]['message']['content'].toString().trim();
+    } catch (e) {
+      print('Search API Error: $e');
+      return 'Sorry, I cannot process this search right now. Please try entering a website URL instead.';
+    }
+  }
+
+
 }

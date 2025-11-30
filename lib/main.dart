@@ -7,6 +7,7 @@ import 'app/services/storage_service.dart';
 import 'app/services/theme_service.dart';
 import 'app/services/analytics_service.dart';
 import 'app/services/performance_service.dart';
+import 'app/services/download_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
@@ -14,6 +15,7 @@ void main() async {
   Get.put(ThemeService());
   Get.put(AnalyticsService());
   Get.put(PerformanceService());
+  Get.put(DownloadService());
   runApp(MyApp());
 }
 class MyApp extends StatelessWidget {

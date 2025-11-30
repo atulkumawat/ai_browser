@@ -10,8 +10,6 @@ class HistoryView extends GetView<HistoryController> {
     return Scaffold(
       appBar: AppBar(
         title: Text('History & Tabs'),
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(Icons.clear_all),
@@ -57,14 +55,13 @@ class HistoryView extends GetView<HistoryController> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.tab, color: Colors.blue.shade600),
+                        Icon(Icons.tab, color: Theme.of(context).colorScheme.primary),
                         SizedBox(width: 8),
                         Text(
                           'Active Tabs (${controller.activeTabs.length})',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade800,
                           ),
                         ),
                       ],
@@ -73,7 +70,7 @@ class HistoryView extends GetView<HistoryController> {
                     ...controller.activeTabs.map((tab) => Card(
                       margin: EdgeInsets.only(bottom: 8),
                       elevation: tab.isActive ? 4 : 1,
-                      color: tab.isActive ? Colors.blue.shade50 : Colors.white,
+                      color: tab.isActive ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
                       child: ListTile(
                         leading: Container(
                           width: 32,
@@ -152,14 +149,13 @@ class HistoryView extends GetView<HistoryController> {
               }),
               Row(
                 children: [
-                  Icon(Icons.history, color: Colors.grey.shade700),
+                  Icon(Icons.history, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
                   SizedBox(width: 8),
                   Text(
                     'Browsing History',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
                     ),
                   ),
                 ],
@@ -173,9 +169,9 @@ class HistoryView extends GetView<HistoryController> {
                         SizedBox(height: 40),
                         Icon(Icons.history, size: 64, color: Colors.grey),
                         SizedBox(height: 16),
-                        Text('No browsing history', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                        Text('No browsing history', style: TextStyle(fontSize: 16)),
                         SizedBox(height: 8),
-                        Text('Start browsing to see history here', style: TextStyle(color: Colors.grey)),
+                        Text('Start browsing to see history here'),
                       ],
                     ),
                   );

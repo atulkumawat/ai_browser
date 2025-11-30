@@ -35,6 +35,11 @@ class BrowserController extends GetxController {
   var selectedLanguage = 'summary'.obs;
   var navigationHistory = <String>[].obs;
   var currentHistoryIndex = 0.obs;
+  var showDownloads = false.obs;
+  var fileContent = ''.obs;
+  var fileName = ''.obs;
+  var isSearchMode = false.obs;
+  var searchResults = ''.obs;
   @override
   void onInit() {
     super.onInit();
@@ -127,29 +132,72 @@ class BrowserController extends GetxController {
       Future.microtask(() => saveTabs());
     }
   }
-  void navigateToUrl(String url) {
-    if (!url.startsWith('http')) {
-      url = 'https://$url';
-    }
-    final currentTab = tabs[currentTabIndex.value];
-    if (navigationHistory.isEmpty || navigationHistory.last != url) {
-      if (currentHistoryIndex.value < navigationHistory.length - 1) {
-        navigationHistory.removeRange(currentHistoryIndex.value + 1, navigationHistory.length);
+  void navigateToUrl(String input) {
+    // Check if input is URL or search text
+    if (_isUrl(input)) {
+      // It's a URL - show webview
+      isSearchMode.value = false;
+      String url = input;
+      if (!url.startsWith('http')) {
+        url = 'https://$url';
       }
-      navigationHistory.add(url);
-      currentHistoryIndex.value = navigationHistory.length - 1;
+      final currentTab = tabs[currentTabIndex.value];
+      if (navigationHistory.isEmpty || navigationHistory.last != url) {
+        if (currentHistoryIndex.value < navigationHistory.length - 1) {
+          navigationHistory.removeRange(currentHistoryIndex.value + 1, navigationHistory.length);
+        }
+        navigationHistory.add(url);
+        currentHistoryIndex.value = navigationHistory.length - 1;
+      }
+      currentTab.url = url;
+      currentTab.title = getTabTitle(url);
+      currentTab.lastAccessed = DateTime.now();
+      urlController.text = url;
+      try {
+        final historyController = Get.find<HistoryController>();
+        historyController.addToHistory(url, currentTab.title);
+      } catch (e) {
+        print('History controller not found: $e');
+      }
+      saveTabs();
+    } else {
+      // It's a search text - show AI content
+      _performSearch(input);
     }
-    currentTab.url = url;
-    currentTab.title = getTabTitle(url);
-    currentTab.lastAccessed = DateTime.now();
-    urlController.text = url;
+  }
+
+  bool _isUrl(String input) {
+    return input.contains('.') && 
+           (input.startsWith('http') || 
+            input.contains('.com') || 
+            input.contains('.org') || 
+            input.contains('.net') || 
+            input.contains('.edu') ||
+            input.contains('www.'));
+  }
+
+  Future<void> _performSearch(String query) async {
     try {
-      final historyController = Get.find<HistoryController>();
-      historyController.addToHistory(url, currentTab.title);
+      isSearchMode.value = true;
+      isLoading.value = true;
+      
+      // Generate AI response for the search query
+      final response = await _aiService.generateSearchResponse(query);
+      searchResults.value = response;
+      
+      // Update current tab
+      final currentTab = tabs[currentTabIndex.value];
+      currentTab.title = 'Search: $query';
+      currentTab.url = 'search://$query';
+      urlController.text = query;
+      
+      saveTabs();
     } catch (e) {
-      print('History controller not found: $e');
+      print('Search failed: $e');
+      searchResults.value = 'Search failed. Please try again.';
+    } finally {
+      isLoading.value = false;
     }
-    saveTabs();
   }
   bool canGoBack() {
     return currentHistoryIndex.value > 0;
@@ -197,6 +245,8 @@ class BrowserController extends GetxController {
     String content = '';
     if (selectedLanguage.value == 'summary') {
       content = currentSummary;
+    } else if (selectedLanguage.value == 'file') {
+      content = fileContent.value;
     } else {
       content = currentTranslations[selectedLanguage.value] ?? '';
     }
@@ -211,6 +261,73 @@ class BrowserController extends GetxController {
       Get.snackbar('Error', 'No content to copy', backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
+  Future<void> downloadAsPDF() async {
+    String content = '';
+    if (selectedLanguage.value == 'summary') {
+      content = currentSummary;
+    } else {
+      content = currentTranslations[selectedLanguage.value] ?? '';
+    }
+    
+    if (content.isNotEmpty) {
+      try {
+        Get.back(); // Close dialog first
+        
+        Get.snackbar(
+          'Processing', 
+          'Creating PDF...',
+          backgroundColor: Colors.blue,
+          colorText: Colors.white,
+          duration: Duration(seconds: 2),
+        );
+        
+        final currentTab = tabs[currentTabIndex.value];
+        final fileName = 'AI_Summary_${DateTime.now().millisecondsSinceEpoch}.txt';
+        
+        // Create PDF content
+        final pdfContent = '''AI Summary Report
+
+Website: ${currentTab.title}
+URL: ${currentTab.url}
+Generated: ${DateTime.now().toString().split('.')[0]}
+Language: ${selectedLanguage.value == 'summary' ? 'English' : selectedLanguage.value}
+
+--- SUMMARY ---
+
+$content
+
+--- END OF SUMMARY ---
+
+Generated by AI Browser App
+Powered by OpenAI GPT-3.5''';
+        
+        final file = await _downloadService.createPDFFile(fileName, pdfContent);
+        if (file != null) {
+          // Store content for later access
+          fileContent.value = pdfContent;
+          this.fileName.value = fileName;
+          
+          Get.snackbar(
+            'Success', 
+            'File downloaded: $fileName',
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: Duration(seconds: 4),
+            mainButton: TextButton(
+              onPressed: () => _downloadService.openFile(file),
+              child: Text('Open', style: TextStyle(color: Colors.white)),
+            ),
+          );
+        }
+      } catch (e) {
+        Get.snackbar('Error', 'Failed to create file: $e', backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    } else {
+      Get.back();
+      Get.snackbar('Error', 'No content to download', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  }
+
   void shareContent() {
     String content = '';
     if (selectedLanguage.value == 'summary') {
@@ -220,81 +337,180 @@ class BrowserController extends GetxController {
     }
     if (content.isNotEmpty) {
       Get.dialog(
-        AlertDialog(
-          title: Text('Share Content'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.copy, color: Colors.blue),
-                title: Text('Copy to Clipboard'),
-                onTap: () {
-                  Get.back();
-                  copyContent();
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.facebook, color: Colors.blue[800]),
-                title: Text('Share on Facebook'),
-                onTap: () async {
-                  Get.back();
-                  final url = 'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(tabs[currentTabIndex.value].url)}';
-                  if (await canLaunchUrl(Uri.parse(url))) {
-                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.share, color: Colors.blue[400]),
-                title: Text('Share on Twitter'),
-                onTap: () async {
-                  Get.back();
-                  final text = Uri.encodeComponent('Check out this summary: ${content.substring(0, content.length > 100 ? 100 : content.length)}...');
-                  final url = 'https://twitter.com/intent/tweet?text=$text&url=${Uri.encodeComponent(tabs[currentTabIndex.value].url)}';
-                  if (await canLaunchUrl(Uri.parse(url))) {
-                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.chat, color: Colors.green),
-                title: Text('Share on WhatsApp'),
-                onTap: () async {
-                  Get.back();
-                  final text = Uri.encodeComponent('Check out this summary: ${content.substring(0, content.length > 100 ? 100 : content.length)}... ${tabs[currentTabIndex.value].url}');
-                  final url = 'https://wa.me/?text=$text';
-                  if (await canLaunchUrl(Uri.parse(url))) {
-                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.email, color: Colors.red),
-                title: Text('Share via Email'),
-                onTap: () async {
-                  Get.back();
-                  final subject = Uri.encodeComponent('AI Summary - ${tabs[currentTabIndex.value].url}');
-                  final body = Uri.encodeComponent('Here is an AI-generated summary:\n\n$content\n\nSource: ${tabs[currentTabIndex.value].url}');
-                  final url = 'mailto:?subject=$subject&body=$body';
-                  if (await canLaunchUrl(Uri.parse(url))) {
-                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              child: Text('Cancel'),
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.share, color: Theme.of(Get.context!).colorScheme.primary, size: 24),
+                    SizedBox(width: 12),
+                    Text(
+                      'Share Content',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Spacer(),
+                    IconButton(
+                      onPressed: () => Get.back(),
+                      icon: Icon(Icons.close, size: 20),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(Get.context!).colorScheme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.copy, color: Colors.blue.shade700, size: 20),
+                        ),
+                        title: Text('Copy to Clipboard'),
+                        subtitle: Text('Copy summary text'),
+                        onTap: () {
+                          Get.back();
+                          copyContent();
+                        },
+                      ),
+                      Divider(height: 1),
+                      ListTile(
+                        leading: Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.picture_as_pdf, color: Colors.red.shade700, size: 20),
+                        ),
+                        title: Text('Download as PDF'),
+                        subtitle: Text('Save summary as PDF file'),
+                        onTap: downloadAsPDF,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Share on Social Media',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(Get.context!).colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildSocialButton(
+                      icon: Icons.facebook,
+                      color: Colors.blue.shade800,
+                      label: 'Facebook',
+                      onTap: () async {
+                        Get.back();
+                        final url = 'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(tabs[currentTabIndex.value].url)}';
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
+                    _buildSocialButton(
+                      icon: Icons.alternate_email,
+                      color: Colors.blue.shade400,
+                      label: 'Twitter',
+                      onTap: () async {
+                        Get.back();
+                        final text = Uri.encodeComponent('Check out this AI summary: ${content.substring(0, content.length > 100 ? 100 : content.length)}...');
+                        final url = 'https://twitter.com/intent/tweet?text=$text&url=${Uri.encodeComponent(tabs[currentTabIndex.value].url)}';
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
+                    _buildSocialButton(
+                      icon: Icons.chat,
+                      color: Colors.green.shade600,
+                      label: 'WhatsApp',
+                      onTap: () async {
+                        Get.back();
+                        final text = Uri.encodeComponent('Check out this AI summary: ${content.substring(0, content.length > 100 ? 100 : content.length)}... ${tabs[currentTabIndex.value].url}');
+                        final url = 'https://wa.me/?text=$text';
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
+                    _buildSocialButton(
+                      icon: Icons.email,
+                      color: Colors.red.shade600,
+                      label: 'Email',
+                      onTap: () async {
+                        Get.back();
+                        final subject = Uri.encodeComponent('AI Summary - ${tabs[currentTabIndex.value].url}');
+                        final body = Uri.encodeComponent('Here is an AI-generated summary:\n\n$content\n\nSource: ${tabs[currentTabIndex.value].url}');
+                        final url = 'mailto:?subject=$subject&body=$body';
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ),
+        barrierDismissible: false,
       );
     } else {
       Get.snackbar('Error', 'No content to share', backgroundColor: Colors.red, colorText: Colors.white);
     }
+  }
+
+  Widget _buildSocialButton({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: color.withOpacity(0.3)),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(Get.context!).colorScheme.onSurface.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
   }
   Future<void> summarizePage() async {
     final currentTab = tabs[currentTabIndex.value];
@@ -410,6 +626,13 @@ class BrowserController extends GetxController {
   void saveTabs() {
     _storage.saveTabs(tabs);
   }
+  void showFileContent(String name, String content) {
+    fileName.value = name;
+    fileContent.value = content;
+    selectedLanguage.value = 'file';
+    showSummaryPanel.value = true;
+  }
+
   @override
   void onClose() {
     urlController.dispose();
